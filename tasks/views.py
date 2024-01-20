@@ -256,6 +256,7 @@ from rest_framework.response import Response
 from .models import Task, Photo
 from .serializers import TaskSerializer, PhotoSerializer
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import F, Q
 
 
 '''class TaskViewSet(viewsets.ViewSet):
@@ -480,6 +481,50 @@ class TaskViewSet(viewsets.ViewSet):
 
         except Task.DoesNotExist:
             return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found.")
+
+        except Exception as e:
+            error = get_plain_error_message_from_exception(e)
+            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
+
+
+
+
+class TaskSearchViewSet(viewsets.ViewSet):
+    serializer_class = TaskSerializer
+
+    def list(self, request):
+        try:
+            queryset = Task.objects.all().order_by(F('priority').desc())
+            #query = self.request.GET.get('q')
+            query=self.request.query_params.get('q')
+            if query:
+                queryset = queryset.filter(Q(title__icontains=query))
+
+            #creation_date = self.request.GET.get('creation_date')
+            creation_date=self.request.query_params.get('creation_date')
+            if creation_date:
+                queryset = queryset.filter(creation_date__date=creation_date)
+
+            #due_date = self.request.GET.get('due_date')
+            due_date=self.request.query_params.get('due_date')
+            if due_date:
+                queryset = queryset.filter(due_date__date=due_date)
+
+            #priority = self.request.GET.get('priority')
+            priority = self.request.query_params.get('priority')
+            if priority:
+                queryset = queryset.filter(priority__icontains=priority)
+
+            #is_complete = self.request.GET.get('is_complete')
+            is_complete = self.request.query_params.get('is_complete')
+            if is_complete == '1':
+                queryset = queryset.filter(is_complete=True)
+            if is_complete == '0':
+                print(0)
+                queryset = queryset.filter(is_complete=False)
+
+            serializer = TaskSerializer(queryset, many=True)
+            return success_response(status.HTTP_200_OK, "Tasks retrieved successfully.", data=serializer.data)
 
         except Exception as e:
             error = get_plain_error_message_from_exception(e)
