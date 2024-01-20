@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Photo, Task
 
 class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,3 +52,17 @@ class SetPasswordSerializer(serializers.Serializer):
     new_password     = serializers.CharField(required = True, min_length = 8)
     confirm_password = serializers.CharField(required = True)
 
+
+
+
+class PhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Photo
+        fields = '__all__'
+
+class TaskSerializer(serializers.ModelSerializer):
+    photos = PhotoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model  = Task
+        fields = '__all__'

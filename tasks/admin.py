@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User
+from .models import User, Task, Photo
 from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
@@ -42,3 +42,16 @@ class CustomUserAdmin(UserAdmin):
         'date_joined',
     ]
 admin.site.register(User, CustomUserAdmin)
+
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ('title', 'description', 'due_date', 'priority', 'is_complete', 'created_at', 'updated_at')
+    search_fields = ('title',)
+    list_filter = ('due_date', 'priority', 'is_complete')
+
+@admin.register(Photo)
+class PhotoAdmin(admin.ModelAdmin):
+    list_display = ('task', 'image', 'created_at')
+    list_filter = ('task', 'created_at')

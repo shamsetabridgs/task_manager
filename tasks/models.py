@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractUser
 import uuid
 from django.utils import timezone
+from django.conf import settings
 
 # Create your models here.
 
@@ -44,3 +45,40 @@ class User(AbstractUser):
     
     class Meta:
         db_table = "auth_user"
+
+
+
+
+class BaseTimeModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add = True)
+    updated_at = models.DateTimeField(auto_now     = True)
+
+    class Meta:
+        abstract = True
+
+
+
+class Task(BaseTimeModel):
+    title       = models.CharField(max_length=255)
+    description = models.TextField()
+    due_date    = models.DateTimeField()
+    priority    = models.CharField(max_length=20, choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')])
+    is_complete = models.BooleanField(default=False)
+    user        = models.ForeignKey(User, on_delete=models.CASCADE)
+    photos      = models.ManyToManyField('Photo', blank=True, related_name='tasks_photos')
+
+    def __str__(self):
+        return self.title
+    
+    class Meta:
+        ordering = ['-due_date']
+
+class Photo(BaseTimeModel):
+    image = models.ImageField(upload_to='task_photos/')
+    task  = models.ForeignKey(Task, related_name='task_photos', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Photo for Task: {self.task.title}"
+
+
+
