@@ -258,7 +258,7 @@ from .serializers import TaskSerializer, PhotoSerializer
 from django.views.decorators.csrf import csrf_exempt
 
 
-class TaskViewSet(viewsets.ViewSet):
+'''class TaskViewSet(viewsets.ViewSet):
     serializer_class = TaskSerializer
 
 
@@ -373,5 +373,114 @@ class TaskViewSet(viewsets.ViewSet):
         
         except Exception as e:
             error = get_plain_error_message_from_exception(e)
+            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)'''
+
+
+class TaskViewSet(viewsets.ViewSet):
+    serializer_class = TaskSerializer
+
+    def list(self, request):
+        try:
+            queryset = Task.objects.all()
+            serializer = TaskSerializer(queryset, many=True)
+            return success_response(status.HTTP_200_OK, "Tasks retrieved successfully.", data=serializer.data)
+        except Exception as e:
+            error = get_plain_error_message_from_exception(e)
             return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
 
+    def retrieve(self, request, pk=None):
+        try:
+            task = Task.objects.get(pk=pk)
+            serializer = TaskSerializer(task)
+            response_data = {
+                'id': serializer.data['id'],
+                'title': serializer.data['title'],
+                'photos': serializer.data['photos'],
+                'description': serializer.data['description'],
+                'due_date': serializer.data['due_date'],
+                'priority': serializer.data['priority'],
+                'is_complete': serializer.data['is_complete'],
+                'user': request.user.email,
+                'created_at': serializer.data['created_at'],
+                'updated_at': serializer.data['updated_at'],
+            }
+            return success_response(status.HTTP_200_OK, "Task retrieved successfully.", data=response_data)
+        except Task.DoesNotExist:
+            return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found.")
+        except Exception as e:
+            error = get_plain_error_message_from_exception(e)
+            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
+
+    def create(self, request, *args, **kwargs):
+        try:
+            request.data['user'] = str(request.user.id)
+            photos_data = request.FILES.getlist('photos', [])
+            
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            task = serializer.save()
+
+            # Save photos
+            for photo_data in photos_data:
+                Photo.objects.create(task=task, image=photo_data)
+
+            response_data = {
+                'id': serializer.data['id'],
+                'title': serializer.data['title'],
+                'photos': serializer.data['photos'],
+                'description': serializer.data['description'],
+                'due_date': serializer.data['due_date'],
+                'priority': serializer.data['priority'],
+                'is_complete': serializer.data['is_complete'],
+                'user': request.user.email,
+                'created_at': serializer.data['created_at'],
+                'updated_at': serializer.data['updated_at'],
+            }
+
+            return success_response(status.HTTP_201_CREATED, "Task created successfully.", data=response_data)
+
+        except Exception as e:
+            error = get_plain_error_message_from_exception(e)
+            return Response(data={"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, pk=None):
+        try:
+            task = Task.objects.get(pk=pk)
+            serializer = TaskSerializer(task, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            response_data = {
+                'id': serializer.data['id'],
+                'title': serializer.data['title'],
+                'photos': serializer.data['photos'],
+                'description': serializer.data['description'],
+                'due_date': serializer.data['due_date'],
+                'priority': serializer.data['priority'],
+                'is_complete': serializer.data['is_complete'],
+                'user': request.user.email,
+                'created_at': serializer.data['created_at'],
+                'updated_at': serializer.data['updated_at'],
+            }
+
+            return success_response(status.HTTP_200_OK, "Task updated successfully", data=response_data)
+
+        except Task.DoesNotExist:
+            return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found")
+
+        except Exception as e:
+            error = get_plain_error_message_from_exception(e)
+            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
+
+    def destroy(self, request, pk=None):
+        try:
+            task = Task.objects.get(pk=pk)
+            task.delete()
+            return success_response(status.HTTP_204_NO_CONTENT, "Task deleted successfully.")
+
+        except Task.DoesNotExist:
+            return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found.")
+
+        except Exception as e:
+            error = get_plain_error_message_from_exception(e)
+            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
