@@ -266,29 +266,36 @@ class TaskViewSet(viewsets.ViewSet):
 
     def list(self, request):
         try:
-            queryset = Task.objects.all().order_by("-created_at")
+            queryset   = Task.objects.all().order_by("-created_at")
             serializer = TaskSerializer(queryset, many=True)
+            
             return success_response(status.HTTP_200_OK, "Tasks retrieved successfully.", data=serializer.data)
+        
         except Exception as e:
             error = get_plain_error_message_from_exception(e)
             return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
 
+    
+    
     def retrieve(self, request, pk=None):
         try:
-            task = Task.objects.get(pk=pk)
+            task       = Task.objects.get(pk=pk)
             serializer = TaskSerializer(task)
             
             return success_response(status.HTTP_200_OK, "Task retrieved successfully.", data=serializer.data)
+        
         except Task.DoesNotExist:
             return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found.")
         except Exception as e:
             error = get_plain_error_message_from_exception(e)
             return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
 
+    
+    
     def create(self, request, *args, **kwargs):
         try:
             request.data['user'] = str(request.user.id)
-            photos_data = request.FILES.getlist('photos', [])
+            photos_data          = request.FILES.getlist('photos', [])
             
             serializer = self.serializer_class(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -298,17 +305,17 @@ class TaskViewSet(viewsets.ViewSet):
             for photo_data in photos_data:
                 Photo.objects.create(task=task, image=photo_data)
 
-            
-
             return success_response(status.HTTP_201_CREATED, "Task created successfully.", data=serializer.data)
 
         except Exception as e:
             error = get_plain_error_message_from_exception(e)
             return Response(data={"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    
+    
     def update(self, request, pk=None):
         try:
-            task = Task.objects.get(pk=pk)
+            task       = Task.objects.get(pk=pk)
             serializer = TaskSerializer(task, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -424,15 +431,13 @@ def task_list(request):
 @login_required
 def task_detail(request, task_id):
     try:
-        # Try to get the task by integer ID
-        task = Task.objects.get(id=task_id)
+        task       = Task.objects.get(id=task_id)
         task_photo = Photo.objects.filter(task__id=task_id)
+    
     except (ValueError, Task.DoesNotExist):
         try:
-            # Try to get the task by UUID
             task = Task.objects.get(id=uuid.UUID(task_id))
         except (ValueError, Task.DoesNotExist, uuid.UUIDError):
-            # If neither integer nor UUID works, raise a 404 error
             raise Http404("Task not found")
 
     return render(request, 'task_detail.html', {'task': task, "task_photo": task_photo})
@@ -486,7 +491,7 @@ def task_delete(request, task_id):
 
     # Ensure that only the creator of the task can delete it
     if task.user != request.user:
-        return render(request, 'permission_denied.html')  # Create this template
+        return render(request, 'permission_denied.html')  
 
     if request.method == 'POST':
         task.delete()
