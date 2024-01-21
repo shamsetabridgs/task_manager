@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Create New Task</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Task</button>
+  </form>
+  <a href="{% url 'task_list' %}">Back to Task List</a>
+  
+  <!-- Include the necessary static files for Tempus Dominus -->
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/tempusdominus-bootstrap-4.css' %}">
+  <script src="{% static 'js/moment.min.js' %}"></script>
+  <script src="{% static 'js/tempusdominus-bootstrap-4.js' %}"></script>
+
+  <!-- Initialize Tempus Dominus date picker for the due_date field -->
+  <script>
+    $(function () {
+      $('#id_due_date').datetimepicker({
+        format: 'YYYY-MM-DD HH:mm',  // Adjust the format as needed
+        showTodayButton: true,
+        // Add any additional options you want to customize the date picker
+      });
+    });
+  </script>
+{% endblock %}

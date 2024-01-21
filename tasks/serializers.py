@@ -61,8 +61,9 @@ class PhotoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class TaskSerializer(serializers.ModelSerializer):
-    photos = PhotoSerializer(many=True, read_only=True)
+    photo = PhotoSerializer(source="task_photos", many=True, read_only=True)
 
     class Meta:
         model  = Task
         fields = '__all__'
+        include = ['photo']

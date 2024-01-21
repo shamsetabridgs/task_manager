@@ -65,7 +65,7 @@ class Task(BaseTimeModel):
     priority    = models.CharField(max_length=20, choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')])
     is_complete = models.BooleanField(default=False)
     user        = models.ForeignKey(User, on_delete=models.CASCADE)
-    photos      = models.ManyToManyField('Photo', blank=True, related_name='tasks_photos')
+    #photos      = models.ManyToManyField('Photo', blank=True, related_name='tasks_photos')
 
     def __str__(self):
         return self.title

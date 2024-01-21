@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task List</title>
+</head>
+<body>
+    <p><a href="{% url 'task_create' %}">Create New Task</a></p>
+    <h2>Task List</h2>
+    
+    {% for task in tasks %}
+        <a href="{% url 'task_detail' task.id %}">{{ task.title }}</a><br>
+    {% endfor %}
+    
+    <p><a href="{% url 'logout' %}">Logout</a></p>
+</body>
+</html>

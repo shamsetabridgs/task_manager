@@ -259,122 +259,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import F, Q
 
 
-'''class TaskViewSet(viewsets.ViewSet):
-    serializer_class = TaskSerializer
-
-
-    def list(self, request):
-        try:
-            queryset   = Task.objects.all()
-            serializer = TaskSerializer(queryset, many=True)
-            return success_response(status.HTTP_200_OK, "Tasks retrieved successfully.", data=serializer.data)       
-       
-        except Exception as e:
-            error = get_plain_error_message_from_exception(e)
-            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
-
- 
- 
-    def retrieve(self, request, pk=None):
-        try:
-            task          = Task.objects.get(pk=pk)
-            serializer    = TaskSerializer(task)
-            response_data = {
-                'id'         : serializer.data['id'],
-                'title'      : serializer.data['title'],
-                'photos'     :serializer.data['photos'],
-                'description': serializer.data['description'],
-                'due_date'   : serializer.data['due_date'],
-                'priority'   : serializer.data['priority'],
-                'is_complete': serializer.data['is_complete'],
-                'user'       : request.user.email,
-                'created_at' : serializer.data['created_at'],
-                'updated_at' : serializer.data['updated_at'],
-            }
-            return success_response(status.HTTP_200_OK, "Task retrieved successfully.", data=response_data)
-        except Task.DoesNotExist:
-            return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found.")
-        except Exception as e:
-            error = get_plain_error_message_from_exception(e)
-            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
-
-    
-    
-    def create(self, request, *args, **kwargs):
-        try:
-            request.data['user']  = str(request.user.id)
-            serializer            = self.serializer_class(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            
-            
-            response_data = {
-                'id'         : serializer.data['id'],
-                'title'      : serializer.data['title'],
-                'photos'     :serializer.data['photos'],
-                'description': serializer.data['description'],
-                'due_date'   : serializer.data['due_date'],
-                'priority'   : serializer.data['priority'],
-                'is_complete': serializer.data['is_complete'],
-                'user'       : request.user.email,
-                'created_at' : serializer.data['created_at'],
-                'updated_at' : serializer.data['updated_at'],
-            }
-
-            return success_response(status.HTTP_201_CREATED, "Task created successfully.", data=response_data)
-
-        
-        except Exception as e:
-            error = get_plain_error_message_from_exception(e)
-            return Response(data={"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    
-  
-    def update(self, request, pk=None):
-        try:
-            task       = Task.objects.get(pk=pk)
-            serializer = TaskSerializer(task, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-            response_data = {
-                'id'         : serializer.data['id'],
-                'title'      : serializer.data['title'],
-                'photos'     :serializer.data['photos'],
-                'description': serializer.data['description'],
-                'due_date'   : serializer.data['due_date'],
-                'priority'   : serializer.data['priority'],
-                'is_complete': serializer.data['is_complete'],
-                'user'       : request.user.email,
-                'created_at' : serializer.data['created_at'],
-                'updated_at' : serializer.data['updated_at'],
-            }
-
-            return success_response(status.HTTP_200_OK, "Task updated successfully", data=response_data)
-       
-       
-        except Task.DoesNotExist:
-            return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found")
-        
-        except Exception as e:
-            error = get_plain_error_message_from_exception(e)
-            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
-
-
-  
-    def destroy(self, request, pk=None):
-        try:
-            task = Task.objects.get(pk=pk)
-            task.delete()
-            return success_response(status.HTTP_204_NO_CONTENT, "Task deleted successfully.")
-        
-
-        except Task.DoesNotExist:
-            return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found.")
-        
-        except Exception as e:
-            error = get_plain_error_message_from_exception(e)
-            return bad_request_response(status.HTTP_400_BAD_REQUEST, error)'''
 
 
 class TaskViewSet(viewsets.ViewSet):
@@ -382,7 +266,7 @@ class TaskViewSet(viewsets.ViewSet):
 
     def list(self, request):
         try:
-            queryset = Task.objects.all()
+            queryset = Task.objects.all().order_by("-created_at")
             serializer = TaskSerializer(queryset, many=True)
             return success_response(status.HTTP_200_OK, "Tasks retrieved successfully.", data=serializer.data)
         except Exception as e:
@@ -393,19 +277,8 @@ class TaskViewSet(viewsets.ViewSet):
         try:
             task = Task.objects.get(pk=pk)
             serializer = TaskSerializer(task)
-            response_data = {
-                'id': serializer.data['id'],
-                'title': serializer.data['title'],
-                'photos': serializer.data['photos'],
-                'description': serializer.data['description'],
-                'due_date': serializer.data['due_date'],
-                'priority': serializer.data['priority'],
-                'is_complete': serializer.data['is_complete'],
-                'user': request.user.email,
-                'created_at': serializer.data['created_at'],
-                'updated_at': serializer.data['updated_at'],
-            }
-            return success_response(status.HTTP_200_OK, "Task retrieved successfully.", data=response_data)
+            
+            return success_response(status.HTTP_200_OK, "Task retrieved successfully.", data=serializer.data)
         except Task.DoesNotExist:
             return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found.")
         except Exception as e:
@@ -425,20 +298,9 @@ class TaskViewSet(viewsets.ViewSet):
             for photo_data in photos_data:
                 Photo.objects.create(task=task, image=photo_data)
 
-            response_data = {
-                'id': serializer.data['id'],
-                'title': serializer.data['title'],
-                'photos': serializer.data['photos'],
-                'description': serializer.data['description'],
-                'due_date': serializer.data['due_date'],
-                'priority': serializer.data['priority'],
-                'is_complete': serializer.data['is_complete'],
-                'user': request.user.email,
-                'created_at': serializer.data['created_at'],
-                'updated_at': serializer.data['updated_at'],
-            }
+            
 
-            return success_response(status.HTTP_201_CREATED, "Task created successfully.", data=response_data)
+            return success_response(status.HTTP_201_CREATED, "Task created successfully.", data=serializer.data)
 
         except Exception as e:
             error = get_plain_error_message_from_exception(e)
@@ -451,20 +313,8 @@ class TaskViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-            response_data = {
-                'id': serializer.data['id'],
-                'title': serializer.data['title'],
-                'photos': serializer.data['photos'],
-                'description': serializer.data['description'],
-                'due_date': serializer.data['due_date'],
-                'priority': serializer.data['priority'],
-                'is_complete': serializer.data['is_complete'],
-                'user': request.user.email,
-                'created_at': serializer.data['created_at'],
-                'updated_at': serializer.data['updated_at'],
-            }
-
-            return success_response(status.HTTP_200_OK, "Task updated successfully", data=response_data)
+            
+            return success_response(status.HTTP_200_OK, "Task updated successfully", data=serializer.data)
 
         except Task.DoesNotExist:
             return bad_request_response(status.HTTP_404_NOT_FOUND, "Task not found")
@@ -529,3 +379,117 @@ class TaskSearchViewSet(viewsets.ViewSet):
         except Exception as e:
             error = get_plain_error_message_from_exception(e)
             return bad_request_response(status.HTTP_400_BAD_REQUEST, error)
+        
+
+
+
+
+#......................................Django for template rendering........................................#
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from .models import Task
+import uuid
+from django.http import Http404
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('task_list')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
+from .forms import Custom_User_CreationForm
+def register_view(request):
+    if request.method == 'POST':
+        form = Custom_User_CreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('task_list')
+    else:
+        form = Custom_User_CreationForm()
+    return render(request, 'register.html', {'form': form})
+
+@login_required
+def task_list(request):
+    tasks = Task.objects.order_by('-created_at')
+    return render(request, 'task_list.html', {'tasks': tasks})
+
+@login_required
+def task_detail(request, task_id):
+    try:
+        # Try to get the task by integer ID
+        task = Task.objects.get(id=task_id)
+        task_photo = Photo.objects.filter(task__id=task_id)
+    except (ValueError, Task.DoesNotExist):
+        try:
+            # Try to get the task by UUID
+            task = Task.objects.get(id=uuid.UUID(task_id))
+        except (ValueError, Task.DoesNotExist, uuid.UUIDError):
+            # If neither integer nor UUID works, raise a 404 error
+            raise Http404("Task not found")
+
+    return render(request, 'task_detail.html', {'task': task, "task_photo": task_photo})
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+
+from .forms import TaskCreationForm
+
+@login_required
+def task_create(request):
+    if request.method == 'POST':
+        form = TaskCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
+            # Save photos related to the task
+            for photo in request.FILES.getlist('photos'):
+                Photo.objects.create(image=photo, task=task)
+            return redirect('task_list')
+    else:
+        form = TaskCreationForm()
+    return render(request, 'task_create.html', {'form': form})
+
+
+from .forms import TaskForm
+from django.contrib import messages
+@login_required
+def task_update(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Task updated successfully.')
+            return redirect('task_list')
+    else:
+        form = TaskForm(instance=task)
+
+    return render(request, 'task_update.html', {'form': form, 'task': task})
+
+
+@login_required
+def task_delete(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    # Ensure that only the creator of the task can delete it
+    if task.user != request.user:
+        return render(request, 'permission_denied.html')  # Create this template
+
+    if request.method == 'POST':
+        task.delete()
+        return redirect('task_list')
+
+    return render(request, 'task_delete.html', {'task': task})

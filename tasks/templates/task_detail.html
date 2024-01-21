@@ -1,0 +1,39 @@
+<!-- task_detail.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Detail</title>
+</head>
+<body>
+    <h2>Title: {{ task.title }}</h2>
+    <p>Description: {{ task.description }}</p>
+    <p>Due Date : {{ task.due_date }}</p>
+    <p>Priority : {{ task.priority }}</p>
+    <p>Created at : {{task.created_at}}</p>
+    <p>Updated at : {{task.updated_at}}</p>
+    <p>Complete status : {{task.is_complete}}</p>
+    <p>Creator : {{task.user.email}}</p>
+
+    {% if task_photo %}
+    <h3>Task Photos</h3>
+    <div>
+        {% for photo in task_photo %}
+            <img src="{{ MEDIA_URL }}{{ photo.image.url }}" alt="{{ task.title }} Photo" style="max-width: 300px; max-height: 300px; margin: 10px;">
+            <p>Image URL: {{ MEDIA_URL }}{{ photo.image.url }}</p>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No photos associated with this task.</p>
+{% endif %}
+
+
+    {% if task.user == request.user %}
+        <p><a href="{% url 'task_update' task_id=task.id %}">Update Task</a></p>
+        <a href="{% url 'task_delete' task.id %}">Delete Task</a>
+    {% endif %}
+
+
+    <p><a href="{% url 'task_list' %}">Back to Task List</a></p>
+</body>
+</html>

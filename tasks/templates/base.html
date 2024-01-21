@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Your Website Title{% endblock %}</title>
+    <!-- Add your CSS styles or links to external stylesheets here -->
+</head>
+<body>
+
+<div id="header">
+    <h1>{% block header %}Your Website Header{% endblock %}</h1>
+    <!-- Add any common header elements here -->
+</div>
+
+<div id="content">
+    {% block content %}{% endblock %}
+</div>
+
+<div id="footer">
+    <p>&copy; {% now "Y" %} Your Website</p>
+    <!-- Add any common footer elements here -->
+</div>
+
+<!-- Add your JavaScript scripts or links to external scripts here -->
+
+</body>
+</html>
